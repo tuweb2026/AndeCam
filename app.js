@@ -8,24 +8,70 @@
 // STATE
 // ==========================================
 
+const STORAGE_KEY = "productoresBolivia";
 let productores = [];
+let areaActual = "artesanias";
 
-try {
-    const datosGuardados =
-        localStorage.getItem("productoresBolivia");
-
-    if (datosGuardados) {
-        productores = JSON.parse(datosGuardados);
-
-        if (!Array.isArray(productores)) {
-            productores = [];
-        }
-    }
-} catch (error) {
-    productores = [];
+function getSupabaseClient() {
+    return window.supabaseClient || null;
 }
 
-let areaActual = "artesanias";
+async function cargarDatosRemotos() {
+    const client = getSupabaseClient();
+    if (!client) return false;
+
+    try {
+        const { data, error } = await client
+            .from("catalog")
+            .select("data")
+            .eq("id", "main")
+            .maybeSingle();
+
+        if (error) {
+            console.warn("No se pudo cargar desde Supabase:", error.message);
+            return false;
+        }
+
+        if (data && Array.isArray(data.data)) {
+            productores = data.data;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(productores));
+            return true;
+        }
+    } catch (error) {
+        console.warn("Fallback a localStorage:", error.message);
+    }
+
+    return false;
+}
+
+function cargarDatosLocales() {
+    try {
+        const datosGuardados = localStorage.getItem(STORAGE_KEY);
+
+        if (datosGuardados) {
+            const datos = JSON.parse(datosGuardados);
+            if (Array.isArray(datos)) {
+                productores = datos;
+            }
+        }
+    } catch (error) {
+        productores = [];
+    }
+}
+
+async function inicializarDatos() {
+    cargarDatosLocales();
+    const remoto = await cargarDatosRemotos();
+
+    if (!remoto && !productores.length) {
+        productores = [];
+    }
+
+    mostrarCatalogo();
+    updateHeroStats();
+}
+
+cargarDatosLocales();
 let productorEditando = null;
 let productoEditando = null;
 let indiceProductoEditando = null;
@@ -1047,15 +1093,37 @@ function leerFoto(archivo) {
 
 
 // ==========================================
-// GUARDAR EN LOCALSTORAGE
+// GUARDAR EN ALMACENAMIENTO COMPARTIDO
 // ==========================================
+
+function sincronizarConSupabase() {
+    const client = getSupabaseClient();
+    if (!client) return;
+
+    client
+        .from("catalog")
+        .upsert(
+            [{ id: "main", data: productores }],
+            { onConflict: "id" }
+        )
+        .then(({ error }) => {
+            if (error) {
+                console.error("Error al sincronizar con Supabase:", error.message);
+            }
+        })
+        .catch((error) => {
+            console.error("Error al sincronizar con Supabase:", error);
+        });
+}
 
 function guardarDatos() {
     try {
         localStorage.setItem(
-            "productoresBolivia",
+            STORAGE_KEY,
             JSON.stringify(productores)
         );
+
+        sincronizarConSupabase();
         return true;
     } catch (error) {
         showToast(
@@ -2131,5 +2199,4 @@ function eliminarProducto(
 // MOSTRAR CATÁLOGO AL INICIAR
 // ==========================================
 
-mostrarCatalogo();
-updateHeroStats();
+inicializarDatos();
