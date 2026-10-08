@@ -30,6 +30,7 @@ let productorEditando = null;
 let productoEditando = null;
 let indiceProductoEditando = null;
 let productorNuevoProducto = null;
+let isAdministrador = false;
 
 
 // ==========================================
@@ -100,6 +101,23 @@ function showToast(message, type = "success") {
             header.classList.remove("scrolled");
         }
     });
+})();
+
+
+// ==========================================
+// MOBILE MENU TOGGLE
+// ==========================================
+
+(function () {
+    const menuToggle = document.getElementById("menuToggle");
+    const mainNav = document.getElementById("mainNav");
+
+    if (menuToggle && mainNav) {
+        menuToggle.addEventListener("click", function () {
+            menuToggle.classList.toggle("open");
+            mainNav.classList.toggle("open");
+        });
+    }
 })();
 
 
@@ -271,6 +289,16 @@ function animateCounter(element, target) {
 
 document.getElementById("btnAdministrar").onclick =
     function () {
+        if (!isAdministrador) {
+            const pin = prompt("Ingrese el PIN de administrador:");
+            if (pin !== "586231") {
+                showToast("PIN incorrecto. Acceso denegado.", "error");
+                return;
+            }
+            isAdministrador = true;
+            showToast("Modo administrador activado", "success");
+            renderizarCatalogo();
+        }
         productorEditando = null;
         productoEditando = null;
         indiceProductoEditando = null;
@@ -1264,7 +1292,9 @@ function mostrarProductor(productor, index) {
     accionesProductor.appendChild(botonEditarProductor);
     accionesProductor.appendChild(botonEliminarProductor);
 
-    cabecera.appendChild(accionesProductor);
+    if (isAdministrador) {
+        cabecera.appendChild(accionesProductor);
+    }
 
     bloque.appendChild(cabecera);
 
@@ -1319,7 +1349,9 @@ function mostrarProductor(productor, index) {
             );
         };
 
-    bloque.appendChild(botonNuevoProducto);
+    if (isAdministrador) {
+        bloque.appendChild(botonNuevoProducto);
+    }
 
     catalogo.appendChild(bloque);
 }
@@ -1669,7 +1701,9 @@ function mostrarProducto(
 
     acciones.appendChild(botonEliminar);
 
-    informacion.appendChild(acciones);
+    if (isAdministrador) {
+        informacion.appendChild(acciones);
+    }
 
     tarjeta.appendChild(informacion);
 
