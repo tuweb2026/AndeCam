@@ -721,6 +721,28 @@ nav {
     transform: translateY(-1px);
 }
 
+/* Delete Producer Button */
+.eliminar-productor {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 8px 16px;
+    margin-top: var(--space-md);
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+    transition: all var(--transition-fast);
+    border: 1px solid transparent;
+}
+
+.eliminar-productor:hover {
+    background: #dc2626;
+    color: var(--white);
+    transform: translateY(-1px);
+}
+
 
 /* === PRODUCT GRID === */
 .lista-productos {

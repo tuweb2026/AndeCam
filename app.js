@@ -1240,7 +1240,31 @@ function mostrarProductor(productor, index) {
             editarProductor(productor);
         };
 
-    cabecera.appendChild(botonEditarProductor);
+    const botonEliminarProductor =
+        document.createElement("button");
+
+    botonEliminarProductor.type = "button";
+
+    botonEliminarProductor.className =
+        "eliminar-productor";
+
+    botonEliminarProductor.innerHTML =
+        '<i class="fas fa-trash-alt"></i> Eliminar productor';
+
+    botonEliminarProductor.onclick =
+        function () {
+            eliminarProductor(productor);
+        };
+
+    const accionesProductor =
+        document.createElement("div");
+    accionesProductor.style.display = "flex";
+    accionesProductor.style.gap = "10px";
+    
+    accionesProductor.appendChild(botonEditarProductor);
+    accionesProductor.appendChild(botonEliminarProductor);
+
+    cabecera.appendChild(accionesProductor);
 
     bloque.appendChild(cabecera);
 
@@ -1977,6 +2001,42 @@ async function guardarProductoEditado() {
     mostrarBotonAgregarProducto(true);
 
     admin.classList.add("oculto");
+
+    mostrarCatalogo();
+    updateHeroStats();
+}
+
+
+// ==========================================
+// ELIMINAR PRODUCTOR
+// ==========================================
+
+function eliminarProductor(productor) {
+    const indice = productores.indexOf(productor);
+
+    if (indice === -1) {
+        return;
+    }
+
+    const confirmar = confirm(
+        "¿Seguro que deseas eliminar al productor \"" +
+        productor.nombre +
+        "\" y todos sus productos?"
+    );
+
+    if (!confirmar) {
+        return;
+    }
+
+    productores.splice(indice, 1);
+
+    const guardado = guardarDatos();
+
+    if (!guardado) {
+        return;
+    }
+
+    showToast("Productor eliminado correctamente.");
 
     mostrarCatalogo();
     updateHeroStats();
