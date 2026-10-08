@@ -16,11 +16,48 @@ function getSupabaseClient() {
     return window.supabaseClient || null;
 }
 
+async function asegurarFilaCatalogo() {
+    const client = getSupabaseClient();
+    if (!client) return false;
+
+    try {
+        const { data, error } = await client
+            .from("catalog")
+            .select("id, data")
+            .eq("id", "main")
+            .maybeSingle();
+
+        if (error) {
+            console.warn("No se pudo consultar la fila del catálogo:", error.message);
+            return false;
+        }
+
+        if (!data) {
+            const { error: insertError } = await client
+                .from("catalog")
+                .insert([{ id: "main", data: [] }]);
+
+            if (insertError) {
+                console.warn("No se pudo crear la fila del catálogo:", insertError.message);
+                return false;
+            }
+        }
+
+        return true;
+    } catch (error) {
+        console.warn("Fallo al asegurar la fila del catálogo:", error.message);
+        return false;
+    }
+}
+
 async function cargarDatosRemotos() {
     const client = getSupabaseClient();
     if (!client) return false;
 
     try {
+        const filaOk = await asegurarFilaCatalogo();
+        if (!filaOk) return false;
+
         const { data, error } = await client
             .from("catalog")
             .select("data")
@@ -65,6 +102,10 @@ async function inicializarDatos() {
 
     if (!remoto && !productores.length) {
         productores = [];
+    }
+
+    if (!productores.length) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(productores));
     }
 
     mostrarCatalogo();
