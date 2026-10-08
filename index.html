@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANDECAM — Artesanías y Transformación Boliviana</title>
+    <meta name="description"
+        content="ANDECAM promueve productos elaborados por productores y artesanos de Bolivia. Artesanías textiles, cerámicas, alimentos transformados y más.">
+    <meta name="keywords" content="artesanías bolivianas, productos Bolivia, textiles, ANDECAM, transformación">
+    <meta name="theme-color" content="#7b1e1e">
+
+    <!-- Favicon -->
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧶</text></svg>">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="estilos.css">
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header id="mainHeader">
+        <div class="header-inner">
+
+            <a href="#inicio" class="logo">
+                <span class="logo-icon">🧶</span>
+                <span class="logo-text">ANDE<span class="logo-accent">CAM</span></span>
+            </a>
+
+            <nav id="mainNav">
+                <a href="#inicio" class="nav-link active">
+                    <i class="fas fa-home"></i> Inicio
+                </a>
+                <a href="#productos" class="nav-link">
+                    <i class="fas fa-store"></i> Productos
+                </a>
+                <a href="#nosotros" class="nav-link">
+                    <i class="fas fa-users"></i> Nosotros
+                </a>
+            </nav>
+
+            <div class="header-actions">
+                <button id="btnAdministrar" class="btn-admin" type="button">
+                    <i class="fas fa-cog"></i> Administrar
+                </button>
+
+                <button id="menuToggle" class="menu-toggle" type="button" aria-label="Abrir menú">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+
+    <!-- HERO -->
+    <section id="inicio" class="hero">
+        <div class="hero-particles" id="heroParticles"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-contenido">
+            <span class="hero-badge">
+                <i class="fas fa-leaf"></i> Hecho en Bolivia
+            </span>
+            <h1>Artesanías &amp; Transformación</h1>
+            <p>
+                Productos elaborados con pasión por productores
+                y artesanos bolivianos. Del campo a tus manos.
+            </p>
+            <div class="hero-buttons">
+                <a href="#productos" class="btn-principal">
+                    <i class="fas fa-shopping-bag"></i> Ver productos
+                </a>
+                <a href="#nosotros" class="btn-secundario">
+                    <i class="fas fa-info-circle"></i> Conócenos
+                </a>
+            </div>
+
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-number" id="statProductores">0</span>
+                    <span class="hero-stat-label">Productores</span>
+                </div>
+                <div class="hero-stat-divider"></div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number" id="statProductos">0</span>
+                    <span class="hero-stat-label">Productos</span>
+                </div>
+                <div class="hero-stat-divider"></div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number">100%</span>
+                    <span class="hero-stat-label">Boliviano</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- PRODUCTOS -->
+    <main id="productos" class="contenedor seccion-productos">
+
+        <div class="seccion-header">
+            <span class="seccion-tag"><i class="fas fa-th-large"></i> Catálogo</span>
+            <h2 class="titulo-seccion">Nuestros Productos</h2>
+            <p class="seccion-subtitulo">
+                Explora artesanías únicas y productos transformados de la tradición boliviana.
+            </p>
+        </div>
+
+
+        <!-- ÁREAS -->
+        <div class="areas">
+            <button id="btnArtesanias" class="btn-area activo" type="button">
+                <i class="fas fa-palette"></i> Artesanías
+            </button>
+            <button id="btnTransformacion" class="btn-area" type="button">
+                <i class="fas fa-industry"></i> Transformación
+            </button>
+        </div>
+
+
+        <!-- CATÁLOGO -->
+        <div id="catalogo"></div>
+    </main>
+
+
+    <!-- NOSOTROS -->
+    <section id="nosotros" class="nosotros">
+        <div class="contenedor nosotros-grid">
+
+            <div class="nosotros-texto">
+                <span class="seccion-tag"><i class="fas fa-heart"></i> Nuestra misión</span>
+                <h2>Sobre ANDECAM</h2>
+                <p>
+                    ANDECAM busca promover productos elaborados por productores
+                    y artesanos de Bolivia, facilitando el contacto directo
+                    entre productores y consumidores.
+                </p>
+                <p>
+                    Creemos en el valor del trabajo artesanal y en la riqueza
+                    cultural que cada producto lleva consigo. Cada compra
+                    apoya directamente a familias bolivianas.
+                </p>
+
+                <div class="nosotros-features">
+                    <div class="nosotros-feature">
+                        <div class="feature-icon"><i class="fas fa-handshake"></i></div>
+                        <div>
+                            <strong>Comercio Directo</strong>
+                            <span>Sin intermediarios</span>
+                        </div>
+                    </div>
+                    <div class="nosotros-feature">
+                        <div class="feature-icon"><i class="fas fa-globe-americas"></i></div>
+                        <div>
+                            <strong>Tradición Boliviana</strong>
+                            <span>Cultura ancestral</span>
+                        </div>
+                    </div>
+                    <div class="nosotros-feature">
+                        <div class="feature-icon"><i class="fas fa-award"></i></div>
+                        <div>
+                            <strong>Calidad Artesanal</strong>
+                            <span>Hecho a mano</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nosotros-visual">
+                <div class="nosotros-img-wrapper">
+                    <img src="IMG/llama.jpeg" alt="Llama boliviana, símbolo de la tradición andina"
+                        loading="lazy">
+                    <div class="nosotros-img-badge">
+                        <i class="fas fa-map-marker-alt"></i> Bolivia
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- MODAL ADMINISTRACIÓN -->
+    <div id="ventanaAdmin" class="modal oculto">
+        <div class="modal-contenido">
+
+            <button id="btnCerrarAdmin" class="cerrar" type="button" aria-label="Cerrar">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="modal-header-icon">
+                <i class="fas fa-cog"></i>
+            </div>
+
+            <h2>
+                <i class="fas fa-user-plus"></i> Registrar productor
+            </h2>
+
+            <p class="modal-subtitulo">
+                Completa los datos del productor y sus productos.
+            </p>
+
+
+            <!-- ÁREA -->
+            <div class="form-group">
+                <label for="area">
+                    <i class="fas fa-layer-group"></i> Área
+                </label>
+                <select id="area">
+                    <option value="artesanias">🧶 Artesanías</option>
+                    <option value="transformacion">🏭 Transformación de productos</option>
+                </select>
+            </div>
+
+
+            <!-- DATOS DEL PRODUCTOR -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nombreProductor">
+                        <i class="fas fa-user"></i> Nombre del productor
+                    </label>
+                    <input id="nombreProductor" type="text" placeholder="Ej. María Quispe">
+                </div>
+
+                <div class="form-group">
+                    <label for="ubicacion">
+                        <i class="fas fa-map-marker-alt"></i> Ubicación
+                    </label>
+                    <input id="ubicacion" type="text" placeholder="Ej. Oruro, Bolivia">
+                </div>
+            </div>
+
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="whatsapp">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </label>
+                    <input id="whatsapp" type="text" placeholder="Ej. 59170000000">
+                </div>
+
+                <div class="form-group">
+                    <label for="facebook">
+                        <i class="fab fa-facebook"></i> Facebook
+                    </label>
+                    <input id="facebook" type="text" placeholder="https://facebook.com/...">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="tiktok">
+                    <i class="fab fa-tiktok"></i> TikTok
+                </label>
+                <input id="tiktok" type="text" placeholder="https://tiktok.com/@...">
+            </div>
+
+
+            <hr class="modal-divider">
+
+
+            <!-- PRODUCTOS -->
+            <h3 class="modal-section-title">
+                <i class="fas fa-box-open"></i> Productos
+            </h3>
+
+            <div id="productosFormulario"></div>
+
+            <button id="btnAgregarProducto" class="btn-agregar" type="button">
+                <i class="fas fa-plus-circle"></i> Agregar producto
+            </button>
+
+            <button id="btnGuardarProductor" class="btn-guardar" type="button">
+                <i class="fas fa-save"></i> Guardar productor
+            </button>
+
+        </div>
+    </div>
+
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="contenedor footer-inner">
+
+            <div class="footer-brand">
+                <span class="logo-icon">🧶</span>
+                <span class="footer-brand-text">ANDECAM</span>
+            </div>
+
+            <p class="footer-tagline">
+                Promoviendo productos bolivianos con orgullo.
+            </p>
+
+            <div class="footer-links">
+                <a href="#inicio"><i class="fas fa-home"></i> Inicio</a>
+                <a href="#productos"><i class="fas fa-store"></i> Productos</a>
+                <a href="#nosotros"><i class="fas fa-users"></i> Nosotros</a>
+            </div>
+
+            <p class="footer-copy">
+                &copy; 2026 ANDECAM. Todos los derechos reservados.
+            </p>
+        </div>
+    </footer>
+
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toastContainer" class="toast-container"></div>
+
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>
