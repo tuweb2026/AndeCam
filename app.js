@@ -1,7 +1,7 @@
 // ==========================================
 // ANDECAM — App Logic
 // Gestión de productores y productos
-// 100% funcional con localStorage
+// Datos locales y sincronización con Supabase
 // ==========================================
 
 // ==========================================
@@ -800,7 +800,7 @@ async function guardarProductor() {
         productor.facebook = facebook;
         productor.tiktok = tiktok;
 
-        const guardado = guardarDatos();
+        const guardado = await guardarDatos();
 
         if (!guardado) {
             return;
@@ -890,19 +890,11 @@ async function guardarProductor() {
         }
 
         const fotos = [];
-
-        for (const archivo of archivos) {
-            try {
-                const foto =
-                    await leerFoto(archivo);
-                fotos.push(foto);
-            } catch (error) {
-                showToast(
-                    "No se pudo cargar una fotografía.",
-                    "error"
-                );
-                return;
-            }
+        try {
+            fotos.push(...await leerFotos(archivos));
+        } catch (error) {
+            showToast(error.message || "No se pudieron cargar las fotografías.", "error");
+            return;
         }
 
         productos.push({
@@ -937,7 +929,7 @@ async function guardarProductor() {
 
     productores.push(productor);
 
-    const guardado = guardarDatos();
+    const guardado = await guardarDatos();
 
     if (!guardado) {
         return;
@@ -1025,18 +1017,11 @@ async function guardarNuevoProducto() {
 
     const fotos = [];
 
-    for (const archivo of archivos) {
-        try {
-            const foto =
-                await leerFoto(archivo);
-            fotos.push(foto);
-        } catch (error) {
-            showToast(
-                "No se pudo cargar una fotografía.",
-                "error"
-            );
-            return;
-        }
+    try {
+        fotos.push(...await leerFotos(archivos));
+    } catch (error) {
+        showToast(error.message || "No se pudieron cargar las fotografías.", "error");
+        return;
     }
 
 
@@ -1075,7 +1060,7 @@ async function guardarNuevoProducto() {
     // GUARDAR
     // ======================================
 
-    const guardado = guardarDatos();
+    const guardado = await guardarDatos();
 
     if (!guardado) {
         return;
@@ -1111,25 +1096,91 @@ async function guardarNuevoProducto() {
 // LEER FOTOGRAFÍA
 // ==========================================
 
-function leerFoto(archivo) {
-    return new Promise(
-        function (resolve, reject) {
-            const lector =
-                new FileReader();
+async function comprimirYSubirFoto(blob) {
+    const client = getSupabaseClient();
+    if (!client) {
+        throw new Error("Configura Supabase para poder guardar fotografías.");
+    }
 
-            lector.onload =
-                function () {
-                    resolve(lector.result);
-                };
+    const urlTemporal = URL.createObjectURL(blob);
+    return new Promise((resolve, reject) => {
+        const imagen = new Image();
+        imagen.onload = async function () {
+            try {
+                const maxDimension = 1600;
+                const scale = Math.min(1, maxDimension / Math.max(imagen.width, imagen.height));
+                const canvas = document.createElement("canvas");
+                canvas.width = Math.max(1, Math.round(imagen.width * scale));
+                canvas.height = Math.max(1, Math.round(imagen.height * scale));
+                canvas.getContext("2d").drawImage(imagen, 0, 0, canvas.width, canvas.height);
 
-            lector.onerror =
-                function () {
-                    reject();
-                };
+                const compressed = await new Promise((resolveBlob, rejectBlob) => {
+                    canvas.toBlob((result) => {
+                        if (result) resolveBlob(result);
+                        else rejectBlob(new Error("No se pudo comprimir una fotografía."));
+                    }, "image/webp", 0.8);
+                });
+                const extension = compressed.type === "image/webp" ? "webp" : "jpg";
+                const id = crypto.randomUUID
+                    ? crypto.randomUUID()
+                    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+                const filePath = `${id}.${extension}`;
+                const { error } = await client.storage
+                    .from("product-photos")
+                    .upload(filePath, compressed, {
+                        contentType: compressed.type,
+                        cacheControl: "31536000",
+                        upsert: false
+                    });
 
-            lector.readAsDataURL(archivo);
+                if (error) throw error;
+                const { data } = client.storage.from("product-photos").getPublicUrl(filePath);
+                resolve(data.publicUrl);
+            } catch (error) {
+                reject(new Error(error.message || "No se pudo guardar una fotografía."));
+            } finally {
+                URL.revokeObjectURL(urlTemporal);
+            }
+        };
+        imagen.onerror = function () {
+            URL.revokeObjectURL(urlTemporal);
+            reject(new Error("El archivo seleccionado no es una imagen válida."));
+        };
+        imagen.src = urlTemporal;
+    });
+}
+
+async function leerFoto(archivo) {
+    if (!archivo.type.startsWith("image/")) {
+        throw new Error("Selecciona únicamente archivos de imagen.");
+    }
+    return comprimirYSubirFoto(archivo);
+}
+
+async function leerFotos(archivos) {
+    const fotos = [];
+    const lote = 5;
+    for (let inicio = 0; inicio < archivos.length; inicio += lote) {
+        const fotosDelLote = await Promise.all(
+            Array.from(archivos).slice(inicio, inicio + lote).map(leerFoto)
+        );
+        fotos.push(...fotosDelLote);
+    }
+    return fotos;
+}
+
+async function migrarFotosBase64() {
+    for (const productor of productores) {
+        for (const producto of productor.productos || []) {
+            if (!Array.isArray(producto.fotos)) continue;
+            for (let indice = 0; indice < producto.fotos.length; indice++) {
+                const foto = producto.fotos[indice];
+                if (typeof foto !== "string" || !foto.startsWith("data:image/")) continue;
+                const respuesta = await fetch(foto);
+                producto.fotos[indice] = await comprimirYSubirFoto(await respuesta.blob());
+            }
         }
-    );
+    }
 }
 
 
@@ -1137,42 +1188,22 @@ function leerFoto(archivo) {
 // GUARDAR EN ALMACENAMIENTO COMPARTIDO
 // ==========================================
 
-function sincronizarConSupabase() {
+async function guardarDatos() {
     const client = getSupabaseClient();
-    if (!client) return;
-
-    client
-        .from("catalog")
-        .upsert(
-            [{ id: "main", data: productores }],
-            { onConflict: "id" }
-        )
-        .then(({ error }) => {
-            if (error) {
-                console.error("Error al sincronizar con Supabase:", error.message);
-            }
-        })
-        .catch((error) => {
-            console.error("Error al sincronizar con Supabase:", error);
-        });
-}
-
-function guardarDatos() {
     try {
-        localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(productores)
-        );
+        if (client) {
+            await migrarFotosBase64();
+            const { error } = await client
+                .from("catalog")
+                .upsert([{ id: "main", data: productores }], { onConflict: "id" });
+            if (error) throw error;
+        }
 
-        sincronizarConSupabase();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(productores));
         return true;
     } catch (error) {
-        showToast(
-            "No se pudieron guardar los datos. " +
-            "Las fotografías pueden ser demasiado grandes. " +
-            "Prueba con menos fotografías o imágenes más pequeñas.",
-            "error"
-        );
+        console.error("No se pudieron guardar los datos:", error);
+        showToast(error.message || "No se pudieron guardar los datos. Verifica tu conexión y la configuración de Supabase Storage.", "error");
         return false;
     }
 }
@@ -2086,18 +2117,11 @@ async function guardarProductoEditado() {
     if (archivos.length > 0) {
         nuevasFotos = [];
 
-        for (const archivo of archivos) {
-            try {
-                const foto =
-                    await leerFoto(archivo);
-                nuevasFotos.push(foto);
-            } catch (error) {
-                showToast(
-                    "No se pudo cargar una fotografía.",
-                    "error"
-                );
-                return;
-            }
+        try {
+            nuevasFotos = await leerFotos(archivos);
+        } catch (error) {
+            showToast(error.message || "No se pudieron cargar las fotografías.", "error");
+            return;
         }
     }
 
@@ -2117,7 +2141,7 @@ async function guardarProductoEditado() {
     // GUARDAR
     // ======================================
 
-    const guardado = guardarDatos();
+    const guardado = await guardarDatos();
 
     if (!guardado) {
         return;
@@ -2154,7 +2178,7 @@ async function guardarProductoEditado() {
 // ELIMINAR PRODUCTOR
 // ==========================================
 
-function eliminarProductor(productor) {
+async function eliminarProductor(productor) {
     const indice = productores.indexOf(productor);
 
     if (indice === -1) {
@@ -2173,7 +2197,7 @@ function eliminarProductor(productor) {
 
     productores.splice(indice, 1);
 
-    const guardado = guardarDatos();
+    const guardado = await guardarDatos();
 
     if (!guardado) {
         return;
@@ -2190,7 +2214,7 @@ function eliminarProductor(productor) {
 // ELIMINAR PRODUCTO
 // ==========================================
 
-function eliminarProducto(
+async function eliminarProducto(
     productor,
     indice
 ) {
@@ -2221,7 +2245,7 @@ function eliminarProducto(
 
     productor.productos.splice(indice, 1);
 
-    const guardado = guardarDatos();
+    const guardado = await guardarDatos();
 
     if (!guardado) {
         return;
