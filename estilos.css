@@ -199,15 +199,10 @@ header.scrolled {
     flex-shrink: 0;
 }
 
-.logo-icon {
-    font-size: 2rem;
-    line-height: 1;
-    filter: drop-shadow(0 2px 4px rgba(123, 30, 30, 0.3));
-    transition: transform var(--transition-fast);
-}
-
-.logo:hover .logo-icon {
-    transform: rotate(-12deg) scale(1.1);
+.logo-image {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
 }
 
 .logo-text {
@@ -350,7 +345,7 @@ nav {
             rgba(61, 14, 14, 0.88) 0%,
             rgba(123, 30, 30, 0.75) 40%,
             rgba(93, 21, 21, 0.85) 100%),
-        url("IMG/lla.jpg");
+        url("IMG/jhava-logo.png");
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -1407,11 +1402,10 @@ footer {
     gap: var(--space-sm);
 }
 
-.footer-brand-text {
-    font-family: var(--font-display);
-    font-size: 1.3rem;
-    font-weight: 800;
-    color: var(--white);
+.footer-logo-image {
+    width: 88px;
+    height: 88px;
+    object-fit: contain;
 }
 
 .footer-tagline {
@@ -1650,10 +1644,6 @@ footer {
 @media (max-width: 480px) {
     .header-inner {
         padding: 0 var(--space-md);
-    }
-
-    .logo-text {
-        font-size: 1.3rem;
     }
 
     .hero-contenido {
