@@ -1193,10 +1193,15 @@ async function guardarDatos() {
     try {
         if (client) {
             await migrarFotosBase64();
-            const { error } = await client
+            const { data, error } = await client
                 .from("catalog")
-                .upsert([{ id: "main", data: productores }], { onConflict: "id" });
+                .upsert([{ id: "main", data: productores }], { onConflict: "id" })
+                .select("id")
+                .single();
             if (error) throw error;
+            if (!data || data.id !== "main") {
+                throw new Error("Supabase no confirmó la actualización del catálogo.");
+            }
         }
 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(productores));
