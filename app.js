@@ -11,6 +11,12 @@
 const STORAGE_KEY = "productoresBolivia";
 let productores = [];
 let areaActual = "artesanias";
+const nombresAreas = {
+    gastronomia: "gastronomía",
+    artesanias: "artesanías",
+    produccion: "producción",
+    transformacion: "transformación"
+};
 
 function getSupabaseClient() {
     return window.supabaseClient || null;
@@ -471,43 +477,26 @@ document.getElementById("btnGuardarProductor").onclick =
 
 
 // ==========================================
-// BOTÓN ARTESANÍAS
+// PESTAÑAS DE CATEGORÍAS
 // ==========================================
 
-document.getElementById("btnArtesanias").onclick =
-    function () {
-        areaActual = "artesanias";
+document.querySelectorAll(".btn-area").forEach(function (boton) {
+    boton.onclick = function () {
+        areaActual = boton.dataset.area;
+
+        document.querySelectorAll(".btn-area").forEach(function (pestana) {
+            const activa = pestana === boton;
+            pestana.classList.toggle("activo", activa);
+            pestana.setAttribute("aria-selected", String(activa));
+        });
 
         document
-            .getElementById("btnArtesanias")
-            .classList.add("activo");
-
-        document
-            .getElementById("btnTransformacion")
-            .classList.remove("activo");
+            .getElementById("catalogo")
+            .setAttribute("aria-labelledby", boton.id);
 
         mostrarCatalogo();
     };
-
-
-// ==========================================
-// BOTÓN TRANSFORMACIÓN
-// ==========================================
-
-document.getElementById("btnTransformacion").onclick =
-    function () {
-        areaActual = "transformacion";
-
-        document
-            .getElementById("btnTransformacion")
-            .classList.add("activo");
-
-        document
-            .getElementById("btnArtesanias")
-            .classList.remove("activo");
-
-        mostrarCatalogo();
-    };
+});
 
 
 // ==========================================
@@ -1259,9 +1248,7 @@ function mostrarCatalogo() {
         );
 
     if (lista.length === 0) {
-        const areaLabel = areaActual === "artesanias"
-            ? "artesanías"
-            : "transformación";
+        const areaLabel = nombresAreas[areaActual] || areaActual;
 
         catalogo.innerHTML = `
             <div class="vacio">
